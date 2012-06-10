@@ -115,43 +115,54 @@
         }
 
         , setValues: function(time) {
-            var meridian, match = time.match(/(AM|PM)/i);
-            if (match) {
-                meridian = match[1];
+            var meridian, timeArray;
+            if (time === 'current') {
+                timeArray = [];
+            } else if (time === 'value') {
+                time = this.$element.val();
             }
-            time = $.trim(time.replace(/(PM|AM)/i, ''));
-            var timeArray = time.split(':');
 
+            if (typeof timeArray === 'undefined') {
+                var match = time.match(/(AM|PM)/i);
+                if (match) {
+                    meridian = match[1];
+                }
+                time = $.trim(time.replace(/(PM|AM)/i, ''));
+                timeArray = time.split(':');
+            }
+
+            if (timeArray.length > 1) {
+                this.meridian = meridian;
+                this.hour = parseInt(timeArray[0], 10);
+                this.minute = parseInt(timeArray[1], 10);
+            } else {
+                this.setCurrentTimeValues();
+            }
+        }
+
+        , setCurrentTimeValues: function(){
+            var dTime = new Date();
+            var hours = dTime.getHours();
+            var minutes = Math.floor(dTime.getMinutes() / this.minuteStep) * this.minuteStep;
+            var meridian = "AM";
+            if ( this.showMeridian ) {
+                if (hours === 0) {
+                    hours = 12;
+                } else if (hours > 12) {
+                    hours = hours - 12;
+                    meridian = "PM";
+                } else {
+                   meridian = "AM";
+                }
+            }
+            this.hour = hours;
+            this.minute = minutes;
             this.meridian = meridian;
-            this.hour = parseInt(timeArray[0], 10);
-            this.minute = parseInt(timeArray[1], 10);
         }
 
         , setDefaultTime: function(defaultTime){
             if (defaultTime) {
-                if (defaultTime === 'current') {
-                    var dTime = new Date();
-                    var hours = dTime.getHours();
-                    var minutes = Math.floor(dTime.getMinutes() / this.minuteStep) * this.minuteStep;
-                    var meridian = "AM";
-                    if ( this.showMeridian ) {
-                        if (hours === 0) {
-                            hours = 12;
-                        } else if (hours > 12) {
-                            hours = hours - 12;
-                            meridian = "PM";
-                        } else {
-                           meridian = "AM";
-                        }
-                    }
-                    this.hour = hours;
-                    this.minute = minutes;
-                    this.meridian = meridian;
-                } else if (defaultTime === 'value') {
-                    this.setValues( this.$element.val() );
-                } else {
-                    this.setValues(defaultTime);
-                }
+                this.setValues(defaultTime);
                 this.update();
             } else {
                 this.hour = 0;
