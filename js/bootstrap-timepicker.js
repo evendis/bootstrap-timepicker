@@ -67,6 +67,8 @@
             e.stopPropagation();
             e.preventDefault();
 
+            $('html').trigger('click.timepicker.data-api');
+
             this.$element.trigger('show');
 
             $('html').on('click.timepicker.data-api', $.proxy(this.hide, this));
